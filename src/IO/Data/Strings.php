@@ -10,11 +10,14 @@ class Strings
 
     public function getCamelCase($string)
     {
-        return @array_map("ucfirst", preg_split('/\-|_/', ' '));
+        $return = @lcfirst(@implode(@array_map("ucfirst", preg_split('/\-|_|\s+/', $string))));
+
+        return $return;
     }
 
     public static function returnCamelCase($string)
     {
-        self::getCamelCase($string);
+        $self = new Strings();
+        return $self->getCamelCase($string);
     }
 }
