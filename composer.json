@@ -15,9 +15,8 @@
         }
     ],
     "autoload": {
-        "files": [],
         "psr-4": {
-            "TorneLIB\\": "src"
+            "\\TorneLIB\\": "src"
         }
     }
 }
