@@ -1,7 +1,7 @@
 {
   "name": "tornevall/tornelib-php-io",
   "description": "I/O library for TorneLIB",
-  "minimum-stability": "stable",
+  "minimum-stability": "dev",
   "license": "Apache-2.0",
   "require": {
     "php": ">=5.3"
