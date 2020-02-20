@@ -1,23 +1,20 @@
 {
-  "name": "tornevall/tornelib-php-io",
-  "description": "I/O library for TorneLIB",
-  "minimum-stability": "dev",
-  "license": "Apache-2.0",
-  "require": {
-    "php": ">=5.3"
-  },
-  "authors": [
-    {
-      "name": "Tomas Tornevall",
-      "email": "thorne@tornevall.net",
-      "homepage": "https://tornevall.net",
-      "role": "Developer"
+    "name": "tornevall/tornelib-php-io",
+    "description": "Tiny I/O handler library for TorneLIB.",
+    "minimum-stability": "dev",
+    "license": "Apache-2.0",
+    "require": {},
+    "authors": [
+        {
+            "name": "Tomas Tornevall",
+            "email": "thorne@tornevall.net",
+            "homepage": "https://tornevall.net",
+            "role": "Developer"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "TorneLIB\\": "src"
+        }
     }
-  ],
-  "autoload": {
-    "files": [],
-    "psr-4": {
-      "\\TorneLIB\\": "src"
-    }
-  }
 }
