@@ -2,12 +2,27 @@
 
 namespace TorneLIB\IO\Data;
 
+/**
+ * Class Strings
+ *
+ * @package TorneLIB\IO\Data
+ * @version 6.1.0
+ */
 class Strings
 {
+    /**
+     * Strings constructor.
+     */
     public function __construct()
     {
+        return $this;
     }
 
+    /**
+     * @param $string
+     * @return string
+     * @since 6.1.0
+     */
     public function getCamelCase($string)
     {
         $return = @lcfirst(@implode(@array_map("ucfirst", preg_split('/\-|_|\s+/', $string))));
@@ -15,10 +30,40 @@ class Strings
         return $return;
     }
 
+    /**
+     * @param $string
+     * @return string
+     * @since 6.1.0
+     */
     public static function returnCamelCase($string)
     {
-        $self = new Strings();
-        return $self->getCamelCase($string);
+        return (new Strings())->getCamelCase($string);
+    }
+
+    /**
+     * @param $string
+     * @return string
+     * @since 6.1.0
+     */
+    public function getSnakeCase($string)
+    {
+        $return = preg_split('/(?=[A-Z])/', $string);
+
+        if (is_array($return)) {
+            $return = implode('_', array_map('strtolower', $return));
+        }
+
+        return (string)$return;
+    }
+
+    /**
+     * @param $string
+     * @return string
+     * @since 6.1.0
+     */
+    public static function returnSnakeCase($string)
+    {
+        return (new Strings())->getSnakeCase($string);
     }
 
     /**
@@ -46,5 +91,54 @@ class Strings
 
         // Deal with large (float) values which run into the maximum integer size.
         return min($bytes, PHP_INT_MAX);
+    }
+
+    /**
+     * @param $data
+     * @return string
+     * @since 6.1.0
+     */
+    public function base64urlEncode($data)
+    {
+        return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
+    }
+
+    /**
+     * @param $data
+     * @return string
+     * @since 6.1.0
+     */
+    public function base64urlDecode($data)
+    {
+        return (string)base64_decode(str_pad(strtr($data, '-_', '+/'), strlen($data) % 4, '=', STR_PAD_RIGHT));
+    }
+
+    /**
+     * @param $name
+     * @param $arguments
+     * @return mixed
+     * @since 6.1.0
+     */
+    public function __call($name, $arguments)
+    {
+        if (method_exists($this, $this->getCamelCase($name))) {
+            return call_user_func_array(
+                [
+                    $this,
+                    $this->getCamelCase($name),
+                ],
+                $arguments
+            );
+        } elseif (method_exists($this, $this->getSnakeCase($name))) {
+            {
+                return call_user_func_array(
+                    [
+                        $this,
+                        $this->getSnakeCase($name),
+                    ],
+                    $arguments
+                );
+            }
+        }
     }
 }
