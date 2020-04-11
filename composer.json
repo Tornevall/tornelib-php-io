@@ -1,9 +1,12 @@
 {
     "name": "tornevall/tornelib-php-io",
     "description": "Tiny I/O handler library for TorneLIB.",
-    "minimum-stability": "dev",
     "license": "Apache-2.0",
-    "require": {},
+    "minimum-stability": "dev",
+    "require": {
+        "tornevall/tornelib-php-utils": ">6.1",
+        "tornevall/tornelib-php-errorhandler": ">6.1"
+    },
     "authors": [
         {
             "name": "Tomas Tornevall",
