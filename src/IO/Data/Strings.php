@@ -114,6 +114,31 @@ class Strings
     }
 
     /**
+     * Convert all data to utf8
+     * @param array $dataArray
+     * @return array
+     * @since 6.0.0
+     */
+    public function getUtf8($dataArray = [])
+    {
+        $newArray = [];
+        if (is_array($dataArray)) {
+            foreach ($dataArray as $p => $v) {
+                if (is_array($v) || is_object($v)) {
+                    $v = $this->getUtf8($v);
+                    $newArray[$p] = $v;
+                } else {
+                    $v = utf8_encode($v);
+                    $newArray[$p] = $v;
+                }
+
+            }
+        }
+
+        return $newArray;
+    }
+
+    /**
      * @param $name
      * @param $arguments
      * @return mixed
