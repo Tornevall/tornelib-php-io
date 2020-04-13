@@ -65,25 +65,6 @@ class Content
     }
 
     /**
-     * @param string $dataIn
-     * @return mixed|string
-     * @since 6.0.5
-     */
-    public function getFromJson($dataIn = '')
-    {
-        if (is_string($dataIn)) {
-            return @json_decode($dataIn);
-        } elseif (is_object($dataIn)) {
-            return null;
-        } elseif (is_array($dataIn)) {
-            return null;
-        } else {
-            // Fail.
-            return null;
-        }
-    }
-
-    /**
      * @param $data
      * @param bool $normalize
      * @return array
@@ -145,6 +126,9 @@ class Content
     }
 
     /**
+     * Extract xml data and return them as objects.
+     * IO-6.0 did not extract soapdata via xpath if the first simpleXml data object failed.
+     *
      * @param $data
      * @param bool $normalize
      * @return object|null
@@ -160,10 +144,60 @@ class Content
         if (!empty($data)) {
             // LIBXML_NOCDATA = 16384 - merge CDATA as text nodes.
             $simpleXmlElement = new \SimpleXMLElement($data, 16384);
+            try {
+                $return = $this->getXmlFromPath($simpleXmlElement);
+                $xmlPath = true;
+            } catch (ExceptionHandler $e) {
+                $xmlPath = false;
+            }
 
-            if ($normalize) {
+            if ($normalize && !$xmlPath && is_null($simpleXmlPath)) {
                 $return = (new Arrays())->arrayObjectToStdClass($simpleXmlElement);
             }
+        }
+
+        return $return;
+    }
+
+    /**
+     * Check if there is something more than just an empty object hidden behind a SimpleXMLElement
+     *
+     * @param null $simpleXML
+     * @return array|mixed|null
+     * @since 6.0.8
+     */
+    private function getXmlFromPath($simpleXML)
+    {
+        $return = null;
+        $xmlXpath = null;
+        $xmlPathReturner = null;
+        if (method_exists($simpleXML, 'xpath')) {
+            try {
+                $xmlXpath = $simpleXML->xpath("*/*");
+            } catch (\Exception $ignoreErrors) {
+            }
+            $realXmlPath = $xmlXpath;
+            if (is_array($xmlXpath)) {
+                if (count($xmlXpath) == 1) {
+                    $xmlPathReturner = array_pop($xmlXpath);
+                } elseif (count($xmlXpath) > 1) {
+                    $xmlPathReturner = $xmlXpath;
+                }
+                if (isset($xmlPathReturner->return)) {
+                    $return = (new Arrays())->arrayObjectToStdClass($xmlPathReturner)->return;
+                } elseif (is_array($xmlPathReturner)) {
+                    $return = $xmlPathReturner;
+                } else {
+                    $return = $realXmlPath;
+                }
+            }
+        }
+
+        if (is_null($return)) {
+            throw new ExceptionHandler(
+                'Could not parse xml from xpath',
+                Constants::LIB_IO_EXTRACT_XPATH_ERROR
+            );
         }
 
         return $return;
@@ -250,5 +284,4 @@ class Content
             Constants::LIB_METHOD_OR_LIBRARY_UNAVAILABLE
         );
     }
-
 }
