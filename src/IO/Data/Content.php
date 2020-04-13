@@ -65,6 +65,25 @@ class Content
     }
 
     /**
+     * @param string $dataIn
+     * @return mixed|string
+     * @since 6.0.5
+     */
+    public function getFromJson($dataIn = '')
+    {
+        if (is_string($dataIn)) {
+            return @json_decode($dataIn);
+        } elseif (is_object($dataIn)) {
+            return null;
+        } elseif (is_array($dataIn)) {
+            return null;
+        } else {
+            // Fail.
+            return null;
+        }
+    }
+
+    /**
      * @param $data
      * @param bool $normalize
      * @return array
