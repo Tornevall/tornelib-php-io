@@ -162,7 +162,9 @@ class Content
         if (!empty($data)) {
             try {
                 // LIBXML_NOCDATA = 16384 - merge CDATA as text nodes.
-                $simpleXmlElement = new \SimpleXMLElement($data, 16384+32);
+                // LIBXML_NOERROR = 32 - make sure there are no errors while going through this function.
+                // Total suppression. We want content, only if there is content.
+                $simpleXmlElement = @new \SimpleXMLElement($data, 16384 + 32);
                 try {
                     $return = $this->getXmlFromPath($simpleXmlElement);
                     $xmlPath = true;
