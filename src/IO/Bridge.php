@@ -68,6 +68,9 @@ class Bridge
         if (method_exists($this->strings, $name)) {
             $requestClass = $this->content;
         }
+        if (method_exists($this->arrays, $name)) {
+            $requestClass = $this->content;
+        }
 
         if (!is_null($requestClass)) {
             $return = call_user_func_array(

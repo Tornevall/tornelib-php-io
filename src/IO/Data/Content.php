@@ -39,7 +39,6 @@ class Content
     }
 
     /**
-     * @throws ExceptionHandler
      * @since 6.1.0
      */
     private function getAvailableSerializers()
@@ -80,6 +79,25 @@ class Content
         }
 
         return $return;
+    }
+
+    /**
+     * @param string $dataIn
+     * @return mixed|string
+     * @since 6.0.5
+     */
+    public function getFromJson($dataIn = '')
+    {
+        if (is_string($dataIn)) {
+            return @json_decode($dataIn);
+        } elseif (is_object($dataIn)) {
+            return null;
+        } elseif (is_array($dataIn)) {
+            return null;
+        } else {
+            // Fail.
+            return null;
+        }
     }
 
     /**
@@ -164,6 +182,7 @@ class Content
      *
      * @param null $simpleXML
      * @return array|mixed|null
+     * @throws ExceptionHandler
      * @since 6.0.8
      */
     private function getXmlFromPath($simpleXML)
