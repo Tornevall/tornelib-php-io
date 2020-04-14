@@ -164,8 +164,10 @@ class Content
                 // LIBXML_NOCDATA = 16384 - merge CDATA as text nodes.
                 // LIBXML_NOERROR = 32 - make sure there are no errors while going through this function.
                 // Total suppression. We want content, only if there is content.
-                $options = ((defined('LIBXML_NOCDATA') ? LIBXML_NOCDATA : 16384) +
-                    (defined('LIBXML_NOERROR' ? LIBXML_NOERROR : 32));
+                $options = (
+                    (defined('LIBXML_NOCDATA') ? LIBXML_NOCDATA : 16384) +
+                    (defined('LIBXML_NOERROR' ? LIBXML_NOERROR : 32))
+                );
                 $simpleXmlElement = @new \SimpleXMLElement($data, $options);
                 try {
                     $return = $this->getXmlFromPath($simpleXmlElement);
