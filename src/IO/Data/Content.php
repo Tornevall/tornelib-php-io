@@ -120,7 +120,7 @@ class Content
             }
         }
 
-        return $return;
+        return trim($return);
     }
 
     /**
@@ -160,17 +160,20 @@ class Content
 
         // Assume this is proper content.
         if (!empty($data)) {
-            // LIBXML_NOCDATA = 16384 - merge CDATA as text nodes.
-            $simpleXmlElement = new \SimpleXMLElement($data, 16384);
             try {
-                $return = $this->getXmlFromPath($simpleXmlElement);
-                $xmlPath = true;
-            } catch (ExceptionHandler $e) {
-                $xmlPath = false;
-            }
+                // LIBXML_NOCDATA = 16384 - merge CDATA as text nodes.
+                $simpleXmlElement = new \SimpleXMLElement($data, 16384+32);
+                try {
+                    $return = $this->getXmlFromPath($simpleXmlElement);
+                    $xmlPath = true;
+                } catch (ExceptionHandler $e) {
+                    $xmlPath = false;
+                }
 
-            if ($normalize && !$xmlPath && is_null($simpleXmlPath)) {
-                $return = (new Arrays())->arrayObjectToStdClass($simpleXmlElement);
+                if ($normalize && !$xmlPath && is_null($simpleXmlPath)) {
+                    $return = (new Arrays())->arrayObjectToStdClass($simpleXmlElement);
+                }
+            } catch (ExceptionHandler $e) {
             }
         }
 
