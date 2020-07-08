@@ -19,8 +19,6 @@ class MODULE_IO
     public function __construct()
     {
         $this->realIo = new Bridge();
-
-        return $this;
     }
 
     /**

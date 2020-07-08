@@ -28,7 +28,7 @@ class contentTest extends TestCase
      */
     public function getFromXml()
     {
-        $fromXml = (new Content())->getFromXml($this->xml);
+        $fromXml = (new Content())->getFromXml($this->xml, 3);
 
         static::assertTrue(
             isset($fromXml->a)
@@ -54,7 +54,7 @@ class contentTest extends TestCase
      */
     public function getFromRss()
     {
-        $fromXml = (new Content())->getFromXml($this->rssDataXml);
+        $fromXml = (new Content())->getFromXml($this->rssDataXml, 1, 'channel');
         static::assertTrue(
             isset($fromXml->channel)
         );
