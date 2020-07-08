@@ -91,7 +91,7 @@ class Content
      * @throws ExceptionHandler
      * @since 6.0.5
      */
-    public function getFromXml($data, $returnOptions = 3, $expectVariable = '')
+    public function getFromXml($data, $returnOptions = 1, $expectVariable = '')
     {
         $return = [];
 
@@ -174,7 +174,7 @@ class Content
      * @return object|null
      * @since 6.1.0
      */
-    public function getFromSimpleXml($data, $returnOptions = 3, $expectVariable = '')
+    public function getFromSimpleXml($data, $returnOptions = 1, $expectVariable = '')
     {
         $return = null;
         $data = $this->validateXml($data);
