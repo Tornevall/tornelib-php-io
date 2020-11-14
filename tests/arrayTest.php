@@ -63,4 +63,24 @@ class arrayTest extends TestCase
             isset($content['part2']['subsection'])
         );
     }
+
+    /**
+     * @test
+     * @since 6.1.0
+     */
+    public function getArrayPaired()
+    {
+        $arrays = new Arrays();
+        $inputArray = [
+            'a',
+            'b',
+            'c',
+            'd',
+        ];
+
+        $assoc = $arrays->getArrayPair(
+            $inputArray
+        );
+        static::assertTrue(count($assoc) === 2 && isset($assoc['a']));
+    }
 }

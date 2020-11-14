@@ -147,15 +147,13 @@ class Strings
                 $arguments
             );
         } elseif (method_exists($this, $this->getSnakeCase($name))) {
-            {
-                return call_user_func_array(
-                    [
-                        $this,
-                        $this->getSnakeCase($name),
-                    ],
-                    $arguments
-                );
-            }
+            return call_user_func_array(
+                [
+                    $this,
+                    $this->getSnakeCase($name),
+                ],
+                $arguments
+            );
         }
     }
 }
