@@ -84,4 +84,42 @@ class Arrays
 
         return array_keys($arrayData) !== range(0, count($arrayData) - 1);
     }
+
+    /**
+     * Pair data into array.
+     *
+     * Example: http://api.tornevall.net/2.0/endpoints/getendpointmethods/endpoint/test/
+     * As a pair, this URI looks like:
+     * /endpoints/getendpointmethods/ - Endpoint+Verb (key=>value)
+     * /endpoint/test/                - Key=>Value (array('endpoint'=>'test'))
+     *
+     * @param array $arrayArgs
+     * @return array
+     * @since 6.1.2
+     */
+    public function getArrayPair($arrayArgs = [])
+    {
+        $pairedArray = [];
+        for ($keyCount = 0; $keyCount < count($arrayArgs); $keyCount = $keyCount + 2) {
+            /**
+             * Silently suppress things that does not exist
+             */
+            if (!isset($pairedArray[$arrayArgs[$keyCount]])) {
+                $pairedArray[$arrayArgs[$keyCount]] = null;
+            }
+            if (!isset($arrayArgs[$keyCount + 1])) {
+                $arrayArgs[$keyCount + 1] = null;
+            }
+
+            /**
+             * Start the pairing
+             */
+            $pairedArray[$arrayArgs[$keyCount]] = (!is_null($arrayArgs[$keyCount + 1]) &&
+            isset($arrayArgs[$keyCount + 1]) ?
+                $arrayArgs[$keyCount + 1] :
+                ""
+            );
+        }
+        return $pairedArray;
+    }
 }
