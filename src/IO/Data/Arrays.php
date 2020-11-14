@@ -105,6 +105,11 @@ class Arrays
              * Silently suppress things that does not exist
              */
             if (!isset($pairedArray[$arrayArgs[$keyCount]])) {
+                // Repair possible dual slashes.
+                if (empty($arrayArgs[$keyCount])) {
+                    $keyCount--;
+                    continue;
+                }
                 $pairedArray[$arrayArgs[$keyCount]] = null;
             }
             if (!isset($arrayArgs[$keyCount + 1])) {
@@ -114,7 +119,7 @@ class Arrays
             /**
              * Start the pairing
              */
-            $pairedArray[$arrayArgs[$keyCount]] = (!is_null($arrayArgs[$keyCount + 1]) &&
+            $pairedArray[$arrayArgs[$keyCount]] = (!empty($arrayArgs[$keyCount + 1]) &&
             isset($arrayArgs[$keyCount + 1]) ?
                 $arrayArgs[$keyCount + 1] :
                 ""
