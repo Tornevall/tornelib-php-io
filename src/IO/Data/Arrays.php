@@ -8,7 +8,7 @@ use TorneLIB\Utils\Security;
 /**
  * Class Arrays
  * @package TorneLIB\IO\Data
- * @version 6.1.3
+ * @version 6.1.4
  */
 class Arrays
 {
@@ -95,7 +95,7 @@ class Arrays
     /**
      * @param $html
      * @return \DOMElement
-     * @since 6.1.3
+     * @since 6.1.2
      */
     private function getPreparedDocument($html)
     {
@@ -121,7 +121,22 @@ class Arrays
             $return = $this->getAssocArrayFromDomTags([$return], $options);
         }
 
+        if (isset($options['asArray'])) {
+            return $return;
+        }
+
         return json_encode($return);
+    }
+
+    /**
+     * @param $html
+     * @param $options
+     * @return false|string
+     * @since 6.1.4
+     */
+    public function getHtmlAsArray($html, $options) {
+        $options['asArray'] = true;
+        return $this->getHtmlAsJson($html, $options);
     }
 
     /**
@@ -129,6 +144,7 @@ class Arrays
      * @param array $tags
      * @param array $getOptions
      * @return array
+     * @since 6.1.2
      */
     public function getHtmlElements($html, $tags = [], $getOptions = [])
     {
@@ -169,13 +185,15 @@ class Arrays
 
     /**
      * @param $array
+     * @param array $options
      * @return array
+     * @since 6.1.3
      */
-    public function getAssocArrayFromDomTags($array, $options=[])
+    public function getAssocArrayFromDomTags($array, $options = [])
     {
         $return = [];
         foreach ($array as $item) {
-            $tag = isset($item['tag']) ? $item['tag'] : '';
+            $tag = isset($item['tag']) ? $item['tag'] : 'noTag';
             $class = isset($item['class']) ? '[' . $item['class'] . ']' : '[noClass]';
             if (isset($item['children'])) {
                 $item['children'] = $this->getAssocArrayFromDomTags($item['children'], $options);
@@ -188,16 +206,24 @@ class Arrays
                     }
                 }
             }
-            $item = $this->unsetDomItems($item, ['tag', 'class']);
-            if (!isset($return[sprintf('%s%s', $tag, $class)])) {
-                $return[sprintf('%s%s', $tag, $class)] = $item;
+            $itemKeyName = sprintf('%s%s', $tag, $class);
+            if (!isset($return[$itemKeyName])) {
+                if (isset($options['indexing']) && $options['indexing'] !== true) {
+                    $return[sprintf('%s%s', $tag, $class)] = $item;
+                } else {
+                    $return[sprintf('%s%s', $tag, $class)][] = $item;
+                }
             } else {
                 if (isset($options['duplicate'])) {
+                    $this->duplicator++;
                     if ($options['duplicate'] !== 'index') {
-                        $this->duplicator++;
-                        $return[sprintf('%s%s_dup_%d', $tag, $class, $this->duplicator)] = $item;
+                        $itemKeyName = sprintf('%s%s_dup_%d', $tag, $class, $this->duplicator);
+                        if (!isset($return[$itemKeyName])) {
+                            $return[$itemKeyName] = $item;
+                        }
                     } else {
-                        $return[sprintf('%s%s', $tag, $class)][] = $item;
+                        $itemKeyName = sprintf('%s%s', $tag, $class);
+                        $return[$itemKeyName][] = $item;
                     }
                 } else {
                     $return[sprintf('%s%s', $tag, $class)] = $item;
@@ -208,25 +234,10 @@ class Arrays
     }
 
     /**
-     * @param $item
-     * @param $keys
-     * @return mixed
-     * @since 6.1.3
-     */
-    private function unsetDomItems($item, $keys)
-    {
-        foreach ($keys as $key) {
-            if (isset($item[$key])) {
-                unset($item[$key]);
-            }
-        }
-        return $item;
-    }
-
-    /**
      * @param $arrayElement
      * @param $getOptions
      * @return mixed|null
+     * @since 6.1.3
      */
     private function getElementFromWalk($arrayElement, $getOptions)
     {
@@ -246,6 +257,7 @@ class Arrays
      * @param $key
      * @param $getOptions
      * @throws ExceptionHandler
+     * @since 6.1.3
      */
     private function getHasWalkedOption($item, $key, $getOptions)
     {
@@ -267,6 +279,7 @@ class Arrays
      * @param $arrayElement
      * @param $getOptions
      * @return bool
+     * @since 6.1.3
      */
     private function getDomWalker($arrayElement, $getOptions)
     {
@@ -285,6 +298,7 @@ class Arrays
     /**
      * @param $element
      * @return array
+     * @since 6.1.2
      */
     private function getDomChildren($element)
     {
@@ -313,6 +327,7 @@ class Arrays
     /**
      * @param $element
      * @return null
+     * @since 6.1.2
      */
     private function getNameType($element)
     {
