@@ -7,6 +7,8 @@ use TorneLIB\Utils\Security;
 
 class Arrays
 {
+    private $duplicator = 0;
+
     /**
      * Convert object to a data object. Formerly known as a repair tool for __PHP_Incomplete_Class.
      *
@@ -58,10 +60,10 @@ class Arrays
         }
         if (is_array($arrObjData)) {
             foreach ($arrObjData as $index => $value) {
-                if (is_object($value) || is_array($value)) {
+                if (isset($value) && (is_object($value) || is_array($value))) {
                     $value = $this->objectsIntoArray($value, $arrSkipIndices); // recursive call
                 }
-                if (@in_array($index, $arrSkipIndices)) {
+                if (isset($arrSkipIndices) && in_array($index, $arrSkipIndices)) {
                     continue;
                 }
                 $arrData[$index] = $value;
@@ -83,6 +85,245 @@ class Arrays
         }
 
         return array_keys($arrayData) !== range(0, count($arrayData) - 1);
+    }
+
+    /**
+     * @param $html
+     * @return \DOMElement
+     * @since 6.1.3
+     */
+    private function getPreparedDocument($html)
+    {
+        $dom = new \DOMDocument();
+        libxml_use_internal_errors(true);
+        $dom->loadHTML($html);
+        return $dom->documentElement;
+    }
+
+    /**
+     * @since 6.1.3
+     */
+    public function getHtmlAsJson($html, $options = [])
+    {
+        $return = [];
+        $document = $this->getPreparedDocument($html);
+
+        if (is_object($document) && isset($document->childNodes)) {
+            $return = $this->getDomChildren($document);
+        }
+
+        if (isset($options['assoc'])) {
+            $return = $this->getAssocArrayFromDomTags([$return], $options);
+        }
+
+        return json_encode($return);
+    }
+
+    /**
+     * @param $html
+     * @param array $tags
+     * @param array $getOptions
+     * @return array
+     */
+    public function getHtmlElements($html, $tags = [], $getOptions = [])
+    {
+        $return = [];
+        $document = $this->getPreparedDocument($html);
+
+        if (is_string($tags) && (bool)preg_match('/,/', $tags)) {
+            $tags = explode(',', $tags);
+        }
+
+        foreach ((array)$tags as $tag) {
+            /** @var \DOMNodeList $elements */
+            $elements = $document->getElementsByTagName($tag);
+            foreach ($elements as $element) {
+                $addElement = false;
+                if (!count($getOptions)) {
+                    $addElement = true;
+                }
+                $arrayElement = $this->getDomChildren($element);
+                $walkedElement = null;
+                if ($this->getDomWalker($arrayElement, $getOptions)) {
+                    $walkedElement = $this->getElementFromWalk($arrayElement, $getOptions);
+                    $addElement = true;
+                }
+
+                if ($addElement && $walkedElement) {
+                    $return = array_merge($return, $walkedElement);
+                }
+            }
+        }
+
+        if (isset($getOptions['assoc'])) {
+            $return = $this->getAssocArrayFromDomTags($return, $getOptions);
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param $array
+     * @return array
+     */
+    public function getAssocArrayFromDomTags($array, $options=[])
+    {
+        $return = [];
+        foreach ($array as $item) {
+            $tag = isset($item['tag']) ? $item['tag'] : '';
+            $class = isset($item['class']) ? '[' . $item['class'] . ']' : '[noClass]';
+            if (isset($item['children'])) {
+                $item['children'] = $this->getAssocArrayFromDomTags($item['children'], $options);
+            }
+            foreach ($item as $key => $values) {
+                if (is_string($values)) {
+                    $item[$key] = trim($values);
+                    if (empty($item[$key])) {
+                        unset($item[$key]);
+                    }
+                }
+            }
+            $item = $this->unsetDomItems($item, ['tag', 'class']);
+            if (!isset($return[sprintf('%s%s', $tag, $class)])) {
+                $return[sprintf('%s%s', $tag, $class)] = $item;
+            } else {
+                if (isset($options['duplicate'])) {
+                    if ($options['duplicate'] !== 'index') {
+                        $this->duplicator++;
+                        $return[sprintf('%s%s_dup_%d', $tag, $class, $this->duplicator)] = $item;
+                    } else {
+                        $return[sprintf('%s%s', $tag, $class)][] = $item;
+                    }
+                } else {
+                    $return[sprintf('%s%s', $tag, $class)] = $item;
+                }
+            }
+        }
+        return $return;
+    }
+
+    /**
+     * @param $item
+     * @param $keys
+     * @return mixed
+     * @since 6.1.3
+     */
+    private function unsetDomItems($item, $keys)
+    {
+        foreach ($keys as $key) {
+            if (isset($item[$key])) {
+                unset($item[$key]);
+            }
+        }
+        return $item;
+    }
+
+    /**
+     * @param $arrayElement
+     * @param $getOptions
+     * @return mixed|null
+     */
+    private function getElementFromWalk($arrayElement, $getOptions)
+    {
+        $return = [];
+        foreach ($arrayElement as $key => $item) {
+            try {
+                $this->getHasWalkedOption($item, $key, $getOptions);
+            } catch (ExceptionHandler $e) {
+                $return[] = $arrayElement;
+            }
+        }
+        return $return;
+    }
+
+    /**
+     * @param $item
+     * @param $key
+     * @param $getOptions
+     * @throws ExceptionHandler
+     */
+    private function getHasWalkedOption($item, $key, $getOptions)
+    {
+        foreach ($getOptions as $optionKey => $optionValue) {
+            if (strtolower($key) === strtolower($optionKey)) {
+                if (strtolower($item) === strtolower($optionValue)) {
+                    throw new ExceptionHandler('Success.', 200);
+                }
+                if (isset($getOptions['regex'])) {
+                    if ((bool)preg_match(sprintf('/%s/i', $optionValue), $item)) {
+                        throw new ExceptionHandler('Success.', 200);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * @param $arrayElement
+     * @param $getOptions
+     * @return bool
+     */
+    private function getDomWalker($arrayElement, $getOptions)
+    {
+        $walkerResult = false;
+        try {
+            array_walk_recursive($arrayElement, function ($item, $key, $getOptions) {
+                $this->getHasWalkedOption($item, $key, $getOptions);
+            }, $getOptions);
+        } catch (ExceptionHandler $e) {
+            $walkerResult = true;
+        }
+
+        return $walkerResult;
+    }
+
+    /**
+     * @param $element
+     * @return array
+     */
+    private function getDomChildren($element)
+    {
+        $nameTypeTag = $this->getNameType($element);
+
+        $domObject = ["tag" => $nameTypeTag];
+        if (isset($element->attributes) && (is_array($element->attributes) || is_object($element->attributes))) {
+            foreach ($element->attributes as $attribute) {
+                $domObject[$attribute->name] = $attribute->value;
+            }
+        }
+        if (isset($element->childNodes)) {
+            foreach ($element->childNodes as $subElement) {
+                if ($subElement->nodeType == XML_TEXT_NODE) {
+                    $domObject["html"] = $subElement->wholeText;
+                } else {
+                    $domObject["children"][] = $this->getDomChildren($subElement, true);
+                }
+            }
+        }
+
+        return $domObject;
+    }
+
+
+    /**
+     * @param $element
+     * @return null
+     */
+    private function getNameType($element)
+    {
+        $return = null;
+        $names = ['tagName', 'nodeName'];
+
+        foreach ($names as $name) {
+            if (isset($element->{$name}) && !empty($element->{$name})) {
+                $return = $element->{$name};
+                break;
+            }
+        }
+
+        $return = preg_replace('/^#/', '', $return);
+
+        return $return;
     }
 
     /**

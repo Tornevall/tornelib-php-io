@@ -2,7 +2,9 @@
 
 use PHPUnit\Framework\TestCase;
 use TorneLIB\Exception\ExceptionHandler;
+use TorneLIB\IO\Data\Arrays;
 use TorneLIB\IO\Data\Content;
+use TorneLIB\Utils\Generic;
 
 require_once(__DIR__ . '/../vendor/autoload.php');
 
