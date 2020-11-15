@@ -4,6 +4,7 @@ use PHPUnit\Framework\TestCase;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\IO\Data\Arrays;
 use TorneLIB\MODULE_IO;
+use TorneLIB\Utils\Generic;
 
 require_once(__DIR__ . '/../vendor/autoload.php');
 
@@ -82,5 +83,42 @@ class arrayTest extends TestCase
             $inputArray
         );
         static::assertTrue(count($assoc) === 2 && isset($assoc['a']));
+    }
+
+    /**
+     * @test
+     */
+    public function getHtmlAsJson()
+    {
+        $generic = new Generic();
+        $generic->setTemplatePath(__DIR__ . '/templates');
+        $html = $generic->getTemplate('moviezine.html');
+
+        $htmlJsonString = (new Arrays())->getHtmlAsJson($html);
+        $htmlJsonStringAssoc = (new Arrays())->getHtmlAsJson($html,
+            [
+                'assoc' => true,
+                'duplicate' => 'index',
+            ]
+        );
+        //$htmlJsonStringAssoc = (new Arrays())->getHtmlAsJson($html, ['assoc' => true]);
+        $htmlJson = json_decode($htmlJsonString);
+        static::assertTrue(isset($htmlJson->children) && !empty($htmlJsonStringAssoc));
+    }
+
+    /**
+     * @test
+     */
+    public function getElementFromHtmlJson()
+    {
+        $generic = new Generic();
+        $generic->setTemplatePath(__DIR__ . '/templates');
+        $html = $generic->getTemplate('moviezine.html');
+
+        $arrays = new Arrays();
+        $htmlAssoc = $arrays->getHtmlElements($html, ['div', 'a'], ['class' => 'inner_article', 'assoc' => true]);
+        $elements = $arrays->getHtmlElements($html, ['div', 'a'], ['class' => 'inner_article']);
+        static::assertCount(20, $elements);
+        static::assertCount(2, $htmlAssoc);
     }
 }

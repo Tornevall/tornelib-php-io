@@ -31,6 +31,9 @@ class Bridge
      */
     private $arrays;
 
+    /**
+     * Bridge constructor.
+     */
     public function __construct()
     {
         $this->strings = new Strings();
@@ -38,6 +41,12 @@ class Bridge
         $this->arrays = new Arrays();
     }
 
+    /**
+     * @param $name
+     * @param $arguments
+     * @return mixed
+     * @throws ExceptionHandler
+     */
     public function __call($name, $arguments)
     {
         $return = null;
