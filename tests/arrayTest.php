@@ -86,30 +86,55 @@ class arrayTest extends TestCase
     }
 
     /**
+     * @throws Exception
      * @test
      */
-    public function getHtmlAsJson()
+    public function getSimpleHtmlAsJson() {
+        $generic = new Generic();
+        $generic->setTemplatePath(__DIR__ . '/templates');
+        $html = $generic->getTemplate('simple.html');
+
+        $htmlJson = json_decode((new Arrays())->getHtmlAsJson(
+            $html,
+            [
+                'assoc' => true,
+            ]
+        ));
+        static::assertTrue(isset($htmlJson->{'html[noClass]'}));
+    }
+
+    /**
+     * @test
+     */
+    public function getZineHtmlAsJson()
     {
         $generic = new Generic();
         $generic->setTemplatePath(__DIR__ . '/templates');
         $html = $generic->getTemplate('moviezine.html');
 
         $htmlJsonString = (new Arrays())->getHtmlAsJson($html);
-        $htmlJsonStringAssoc = (new Arrays())->getHtmlAsJson($html,
+        $htmlJsonStringAssoc = (new Arrays())->getHtmlAsJson(
+            $html,
             [
                 'assoc' => true,
-                'duplicate' => 'index',
+                'duplicate' => 'assoc',
             ]
         );
-        //$htmlJsonStringAssoc = (new Arrays())->getHtmlAsJson($html, ['assoc' => true]);
+        $htmlArrayStringAssoc = (new Arrays())->getHtmlAsArray(
+            $html,
+            [
+                'assoc' => true,
+                'duplicate' => 'assoc',
+            ]
+        );
         $htmlJson = json_decode($htmlJsonString);
-        static::assertTrue(isset($htmlJson->children) && !empty($htmlJsonStringAssoc));
+        static::assertTrue(isset($htmlJson->children) && !empty($htmlJsonStringAssoc) && isset($htmlArrayStringAssoc['html[no_lightbox]']));
     }
 
     /**
      * @test
      */
-    public function getElementFromHtmlJson()
+    public function getZineElementFromHtmlJson()
     {
         $generic = new Generic();
         $generic->setTemplatePath(__DIR__ . '/templates');

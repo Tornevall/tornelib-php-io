@@ -6,7 +6,7 @@ namespace TorneLIB\IO\Data;
  * Class Strings
  *
  * @package TorneLIB\IO\Data
- * @version 6.1.3
+ * @version 6.1.4
  */
 class Strings
 {

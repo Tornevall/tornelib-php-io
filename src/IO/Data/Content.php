@@ -10,7 +10,7 @@ use TorneLIB\Utils\Security;
 /**
  * Class Content
  * @package TorneLIB\IO\Data
- * @version 6.1.3
+ * @version 6.1.4
  */
 class Content
 {
