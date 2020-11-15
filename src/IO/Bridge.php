@@ -13,6 +13,7 @@ use TorneLIB\IO\Data\Strings;
  *
  * @package TorneLIB\IO
  * @deprecated If you ever thinking of using this, please don't. Use direct calls instead.
+ * @version 6.1.3
  */
 class Bridge
 {

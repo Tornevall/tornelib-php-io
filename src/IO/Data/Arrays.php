@@ -5,6 +5,11 @@ namespace TorneLIB\IO\Data;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Utils\Security;
 
+/**
+ * Class Arrays
+ * @package TorneLIB\IO\Data
+ * @version 6.1.3
+ */
 class Arrays
 {
     private $duplicator = 0;
