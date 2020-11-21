@@ -93,24 +93,6 @@ class Content
     }
 
     /**
-     * @param $data
-     * @param int $returnOptions
-     * @param string $expectVariable
-     * @return array
-     * @since 6.0.5
-     */
-    public function getFromXml($data, $returnOptions = 1, $expectVariable = '')
-    {
-        $return = [];
-
-        if ($this->simpleElement) {
-            $return = $this->getFromSimpleXml($data, $returnOptions, $expectVariable);
-        }
-
-        return $return;
-    }
-
-    /**
      * @param string $dataIn
      * @return mixed|string
      * @since 6.0.5
@@ -235,6 +217,24 @@ class Content
                 }
             } catch (ExceptionHandler $e) {
             }
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param $data
+     * @param int $returnOptions
+     * @param string $expectVariable
+     * @return array|object|\SimpleXMLElement
+     * @since 6.0.5
+     */
+    public function getFromXml($data, $returnOptions = 1, $expectVariable = '')
+    {
+        $return = [];
+
+        if ($this->simpleElement) {
+            $return = $this->getFromSimpleXml($data, $returnOptions, $expectVariable);
         }
 
         return $return;
