@@ -89,7 +89,8 @@ class arrayTest extends TestCase
      * @throws Exception
      * @test
      */
-    public function getSimpleHtmlAsJson() {
+    public function getSimpleHtmlAsJson()
+    {
         $generic = new Generic();
         $generic->setTemplatePath(__DIR__ . '/templates');
         $html = $generic->getTemplate('simple.html');

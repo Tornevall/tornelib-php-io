@@ -15,6 +15,16 @@ use TorneLIB\Utils\Security;
 class Content
 {
     /**
+     * @var int XML_NORMALIZE Normalize XML content.
+     * @since 6.1.1
+     */
+    const XML_NORMALIZE = 1;
+    /**
+     * @var int XML_NO_PATH Do not follow the xml-path.
+     * @since 6.1.1
+     */
+    const XML_NO_PATH = 2;
+    /**
      * @var
      */
     private $serializer;
@@ -26,19 +36,6 @@ class Content
      * @var
      */
     private $simpleElement;
-
-    /**
-     * @var int XML_NORMALIZE Normalize XML content.
-     * @since 6.1.1
-     */
-    const XML_NORMALIZE = 1;
-
-    /**
-     * @var int XML_NO_PATH Do not follow the xml-path.
-     * @since 6.1.1
-     */
-    const XML_NO_PATH = 2;
-
     /**
      * Special options array to use with XML requests.
      * @var array
@@ -93,6 +90,26 @@ class Content
     }
 
     /**
+     * Set options for xml input.
+     *
+     * @param $options
+     * @param null $optionsValue
+     * @return $this
+     */
+    public function setXmlOptions($options, $optionsValue = null)
+    {
+        if (is_array($options)) {
+            foreach ($options as $optionKey => $optionValue) {
+                $this->xmlOptions[$optionKey] = $optionValue;
+            }
+        } elseif (!is_null($optionsValue)) {
+            $this->xmlOptions[$options] = $optionsValue;
+        }
+
+        return $this;
+    }
+
+    /**
      * @param string $dataIn
      * @return mixed|string
      * @since 6.0.5
@@ -113,47 +130,20 @@ class Content
 
     /**
      * @param $data
-     * @return string
-     * @since 6.1.0
+     * @param int $returnOptions
+     * @param string $expectVariable
+     * @return mixed
+     * @since 6.0.5
      */
-    private function validateXml($data)
+    public function getFromXml($data, $returnOptions = 1, $expectVariable = '')
     {
-        $return = '';
+        $return = [];
 
-        if (is_string($data) &&
-            preg_match('/<(.*?)>/s', $data)
-        ) {
-            $return = $data;
-        } else {
-            if (!preg_match('/^</', $data) && preg_match("/&\b(.*?)+;(.*)/is", $data)) {
-                $dataEntity = trim(html_entity_decode($data));
-                if (preg_match('/^</', $dataEntity)) {
-                    $return = $dataEntity;
-                }
-            }
+        if ($this->simpleElement) {
+            $return = $this->getFromSimpleXml($data, $returnOptions, $expectVariable);
         }
 
-        return trim($return);
-    }
-
-    /**
-     * Set options for xml input.
-     *
-     * @param $options
-     * @param null $optionsValue
-     * @return $this
-     */
-    public function setXmlOptions($options, $optionsValue = null)
-    {
-        if (is_array($options)) {
-            foreach ($options as $optionKey => $optionValue) {
-                $this->xmlOptions[$optionKey] = $optionValue;
-            }
-        } elseif (!is_null($optionsValue)) {
-            $this->xmlOptions[$options] = $optionsValue;
-        }
-
-        return $this;
+        return $return;
     }
 
     /**
@@ -225,20 +215,27 @@ class Content
 
     /**
      * @param $data
-     * @param int $returnOptions
-     * @param string $expectVariable
-     * @return mixed
-     * @since 6.0.5
+     * @return string
+     * @since 6.1.0
      */
-    public function getFromXml($data, $returnOptions = 1, $expectVariable = '')
+    private function validateXml($data)
     {
-        $return = [];
+        $return = '';
 
-        if ($this->simpleElement) {
-            $return = $this->getFromSimpleXml($data, $returnOptions, $expectVariable);
+        if (is_string($data) &&
+            preg_match('/<(.*?)>/s', $data)
+        ) {
+            $return = $data;
+        } else {
+            if (!preg_match('/^</', $data) && preg_match("/&\b(.*?)+;(.*)/is", $data)) {
+                $dataEntity = trim(html_entity_decode($data));
+                if (preg_match('/^</', $dataEntity)) {
+                    $return = $dataEntity;
+                }
+            }
         }
 
-        return $return;
+        return trim($return);
     }
 
     /**
@@ -287,24 +284,25 @@ class Content
     }
 
     /**
-     * @param $data
-     * @param \SimpleXMLElement $xml
-     * @return \SimpleXMLElement
-     * @since 6.1.0
-     * @noinspection PhpFullyQualifiedNameUsageInspection
+     * @param array $contentData
+     * @param null $renderAndDie
+     * @param null $compression
+     * @param string $initialTagName
+     * @param string $rootName
+     * @return mixed
+     * @throws Exception
+     * @since 6.0.1
+     * @deprecated From 6.0, use 6.1 getXmlFromArray instead.
+     * @noinspection PhpUnusedParameterInspection
      */
-    private function getXmlTransformed($data, $xml)
-    {
-        foreach ($data as $key => $value) {
-            $key = is_numeric($key) ? 'item' : $key;
-            if (is_array($value)) {
-                $this->getXmlTransformed($value, $xml->addChild($key));
-            } else {
-                $xml->addChild($key, $value);
-            }
-        }
-
-        return $xml;
+    public function renderXml(
+        $contentData = [],
+        $renderAndDie = null,
+        $compression = null,
+        $initialTagName = 'item',
+        $rootName = 'XMLResponse'
+    ) {
+        return $this->getXmlFromArray($contentData);
     }
 
     /**
@@ -336,25 +334,24 @@ class Content
     }
 
     /**
-     * @param array $contentData
-     * @param null $renderAndDie
-     * @param null $compression
-     * @param string $initialTagName
-     * @param string $rootName
-     * @return mixed
-     * @throws Exception
-     * @since 6.0.1
-     * @deprecated From 6.0, use 6.1 getXmlFromArray instead.
-     * @noinspection PhpUnusedParameterInspection
+     * @param $data
+     * @param \SimpleXMLElement $xml
+     * @return \SimpleXMLElement
+     * @since 6.1.0
+     * @noinspection PhpFullyQualifiedNameUsageInspection
      */
-    public function renderXml(
-        $contentData = [],
-        $renderAndDie = null,
-        $compression = null,
-        $initialTagName = 'item',
-        $rootName = 'XMLResponse'
-    ) {
-        return $this->getXmlFromArray($contentData);
+    private function getXmlTransformed($data, $xml)
+    {
+        foreach ($data as $key => $value) {
+            $key = is_numeric($key) ? 'item' : $key;
+            if (is_array($value)) {
+                $this->getXmlTransformed($value, $xml->addChild($key));
+            } else {
+                $xml->addChild($key, $value);
+            }
+        }
+
+        return $xml;
     }
 
     public function __call($name, $arguments)
