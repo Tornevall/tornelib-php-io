@@ -10,7 +10,7 @@ use TorneLIB\Utils\Security;
 /**
  * Class Content
  * @package TorneLIB\IO\Data
- * @version 6.1.4
+ * @version 6.1.5
  */
 class Content
 {
@@ -164,6 +164,7 @@ class Content
      * @param int $returnOptions NORMALIZE + XML_NO_PATH
      * @param string $expectVariable
      * @return object|null
+     * @throws Exception
      * @since 6.1.0
      */
     public function getFromSimpleXml($data, $returnOptions = 1, $expectVariable = '')
@@ -226,7 +227,7 @@ class Content
      * @param $data
      * @param int $returnOptions
      * @param string $expectVariable
-     * @return array|object|\SimpleXMLElement
+     * @return mixed
      * @since 6.0.5
      */
     public function getFromXml($data, $returnOptions = 1, $expectVariable = '')
@@ -312,20 +313,26 @@ class Content
      * @param string $initialTagName
      * @param bool $toUtf8
      * @return mixed
+     * @throws Exception
      * @noinspection PhpUnusedParameterInspection
      */
     public function getXmlFromArray($data, $rootName = 'XMLResponse', $initialTagName = 'item', $toUtf8 = true)
     {
+        $return = null;
         if ($toUtf8) {
             $data = (new Strings())->getUtf8($data);
         }
 
-        /** @noinspection PhpFullyQualifiedNameUsageInspection */
-        $xml = new \SimpleXMLElement('<?xml version="1.0"?>' . '<' . $rootName . '></' . $rootName . '>');
-        return $this->getXmlTransformed(
-            $data,
-            $xml
-        )->asXML();
+        if (class_exists('\SimpleXMLElement')) {
+            /** @noinspection PhpFullyQualifiedNameUsageInspection */
+            $xml = new \SimpleXMLElement('<?xml version="1.0"?>' . '<' . $rootName . '></' . $rootName . '>');
+            $return = $this->getXmlTransformed(
+                $data,
+                $xml
+            )->asXML();
+        }
+
+        return $return;
     }
 
     /**
@@ -335,6 +342,7 @@ class Content
      * @param string $initialTagName
      * @param string $rootName
      * @return mixed
+     * @throws Exception
      * @since 6.0.1
      * @deprecated From 6.0, use 6.1 getXmlFromArray instead.
      * @noinspection PhpUnusedParameterInspection
