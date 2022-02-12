@@ -86,7 +86,27 @@ class stringsTest extends TestCase
      */
     public function obfuscateFull()
     {
-        $obfuscated = (new Strings())->getObfuscatedStringFull('Just a string.');
+        $strings = new Strings();
+        $obfuscateFirst = $strings->getObfuscatedStringFull('Just a string.', 2);
+        $obfuscateSecond = $strings->getObfuscatedStringFull('Just a string.', 3);
+        $obfuscateThird = $strings->getObfuscatedStringFull('Just a string.', 4, 0);
+        // Breaking rules.
+        $obfuscateFourth = $strings->getObfuscatedStringFull('Just', 5, 5);
+        static::assertTrue(
+            $obfuscateFirst === 'Ju************.' &&
+            $obfuscateSecond === 'Jus************.' &&
+            $obfuscateThird === 'Just************' &&
+            $obfuscateFourth === 'Just'
+        );
+    }
+
+    /**
+     * @test
+     * @since 6.1.6
+     */
+    public function obfuscateFullRaisedLimit()
+    {
+        $obfuscated = (new Strings())->getObfuscatedStringFull('Just a string.', 2);
         static::assertTrue($obfuscated === 'J************.');
     }
 
