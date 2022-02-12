@@ -72,6 +72,7 @@ class stringsTest extends TestCase
 
     /**
      * @test
+     * @since 6.1.6
      */
     public function obfuscateRandomly()
     {
@@ -81,6 +82,7 @@ class stringsTest extends TestCase
 
     /**
      * @test
+     * @since 6.1.6
      */
     public function obfuscateFull()
     {
@@ -91,6 +93,7 @@ class stringsTest extends TestCase
     /**
      * @test
      * @testdox Avoiding exceptions.
+     * @since 6.1.6
      */
     public function obfuscateTooShort()
     {
