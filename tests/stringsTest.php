@@ -69,4 +69,32 @@ class stringsTest extends TestCase
             (new Strings())->base64url_encode('base64') === 'YmFzZTY0'
         );
     }
+
+    /**
+     * @test
+     */
+    public function obfuscateRandomly()
+    {
+        $obfuscated = (new Strings())->getObfuscatedString('A long obfuscated string');
+        static::assertTrue((bool)preg_match('/\*/', $obfuscated));
+    }
+
+    /**
+     * @test
+     */
+    public function obfuscateFull()
+    {
+        $obfuscated = (new Strings())->getObfuscatedStringFull('Just a string.');
+        static::assertTrue($obfuscated === 'J************.');
+    }
+
+    /**
+     * @test
+     * @testdox Avoiding exceptions.
+     */
+    public function obfuscateTooShort()
+    {
+        $obfuscated = (new Strings())->getObfuscatedStringFull('AB');
+        static::assertTrue($obfuscated === 'AB');
+    }
 }
