@@ -8,7 +8,7 @@ use TorneLIB\Utils\Security;
 /**
  * Class Arrays
  * @package TorneLIB\IO\Data
- * @version 6.1.7
+ * @version 6.1.8
  */
 class Arrays
 {
@@ -83,8 +83,12 @@ class Arrays
      * @return bool
      * @since 6.0.2
      */
-    public function isAssoc(array $arrayData)
+    public function isAssoc($arrayData)
     {
+        // Return false if it isn't an array at all.
+        if (!is_array($arrayData)) {
+            return false;
+        }
         if ([] === $arrayData) {
             return false;
         }
