@@ -8,7 +8,7 @@ use Exception;
  * Class Strings
  *
  * @package TorneLIB\IO\Data
- * @version 6.1.4
+ * @version 6.1.8
  */
 class Strings
 {
@@ -122,6 +122,9 @@ class Strings
                     $v = $this->getUtf8($v);
                     $newArray[$p] = $v;
                 } else {
+                    if (!isset($v) || is_null($v)) {
+                        $v = '';
+                    }
                     $v = utf8_encode($v);
                     $newArray[$p] = $v;
                 }
